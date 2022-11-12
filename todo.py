@@ -30,6 +30,21 @@ if args.add is not None:
 
 if args.toggle is not None:
     print('Przełączamy...')
+    query = cursor.execute('SELECT is_done FROM todos WHERE id=?', (args.toggle,))
+    is_done = query.fetchone()
+    if is_done is None:
+        print('Nie mam takiego todo')
+        quit()
+    elif is_done[0] == 1:
+        print('Zamieniam na niezrobione.')
+        new_is_done = 0
+    elif is_done[0] == 0:
+        print('Zamieniam na zrobione')
+        new_is_done = 1
+
+    cursor.execute('UPDATE todos SET is_done=? WHERE id=?', (new_is_done, args.toggle))
+    connection.commit()
 
 if args.list:
-    print('Wyświetlamy')
+    for todo_id, title, is_done in cursor.execute('SELECT id, title, is_done FROM todos'):
+        print(f'{todo_id} \t {title} \t {"[v]" if is_done else "[ ]"}' )
